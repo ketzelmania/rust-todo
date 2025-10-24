@@ -1,6 +1,7 @@
 use crate::schemas::environment::Environment;
 use dotenvy::dotenv;
 
+mod db;
 mod handlers;
 mod models;
 mod routes;

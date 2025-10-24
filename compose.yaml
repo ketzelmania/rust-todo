@@ -25,6 +25,20 @@ services:
     ports:
       - 5432:5432
 
+  test_db:
+    container_name: rust_todo_postgres_test
+    image: postgres
+    restart: always
+    shm_size: 128mb
+
+    environment:
+      POSTGRES_PASSWORD: password
+      POSTGRES_USER: postgres
+      POSTGRESS_DB: rust-todo-test-db
+      
+    ports:
+      - 5433:5433
+
   # proxy:
   #   container_name: proxy
   #   image: nginx:latest

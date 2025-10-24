@@ -6,3 +6,5 @@ CREATE TABLE users (
     password TEXT NOT NULL,
     session_key TEXT
 );
+
+INSERT INTO users (username, password) VALUES ('joe123', 'abc');
