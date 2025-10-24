@@ -1,0 +1,43 @@
+services:
+  # server:
+  #   container_name: rust_todo_rest
+  #   build:
+  #     context: app
+  #     dockerfile: ./Dockerfile
+  #   ports:
+  #     - 8123:8080
+  #   develop:
+  #     watch:
+  #       - action: rebuild
+  #         path: ./app
+
+  db:
+    container_name: rust_todo_postgres
+    image: postgres
+    restart: always
+    shm_size: 128mb
+
+    environment:
+      POSTGRES_PASSWORD: password
+      POSTGRES_USER: postgres
+      POSTGRESS_DB: rust-todo-rest-api
+      
+    ports:
+      - 5432:5432
+
+  # proxy:
+  #   container_name: proxy
+  #   image: nginx:latest
+  #   ports:
+  #     - 80:80
+  #     - 443:443
+  #   volumes:
+  #     - ./nginx/conf/:/etc/nginx/conf.d/:ro
+  #     - ./certbot/www/:/var/www/certbot/:ro
+  #     - ./certbot/conf/:/etc/nginx/ssl/:ro
+
+  # certbot:
+  #   image: certbot/certbot:latest
+  #   volumes:
+  #     - ./certbot/www/:/var/www/certbot/:rw
+  #     - ./certbot/conf/:/etc/letsencrypt/:rw
