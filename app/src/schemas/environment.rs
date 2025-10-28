@@ -1,6 +1,6 @@
 use std::{convert::Infallible, env::Args, error::Error};
 
-use sqlx::PgPool;
+use sqlx::{PgPool, Pool};
 use warp::Filter;
 
 #[derive(Debug, Clone)]
@@ -13,6 +13,10 @@ impl Environment {
         let db_pool = PgPool::connect(database_url).await?;
 
         Ok(Self { db_pool })
+    }
+
+    pub async fn from_pool(pool: PgPool) -> Result<Self, Box<dyn Error>> {
+        Ok(Self { db_pool: pool })
     }
 
     pub fn db(&self) -> &PgPool {

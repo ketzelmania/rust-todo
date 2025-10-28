@@ -44,6 +44,14 @@ pub async fn new_item(env: &Environment, item: &TodoItem) -> Result<(), Error> {
 
 // TODO: session keys
 
+pub async fn get_user_from_id(env: &Environment, id: i32) -> Result<User, Error> {
+    let list = sqlx::query_as!(User, "SELECT * FROM users WHERE id = $1", id)
+        .fetch_one(env.db())
+        .await?;
+
+    Ok(list)
+}
+
 pub async fn get_list_from_id(env: &Environment, id: i32) -> Result<List, Error> {
     let list = sqlx::query_as!(List, "SELECT * FROM lists WHERE id = $1", id)
         .fetch_one(env.db())
@@ -66,4 +74,130 @@ pub async fn get_list_items(env: &Environment, id: i32) -> Result<Vec<TodoItem>,
         .await?;
 
     Ok(items)
+}
+
+#[cfg(test)]
+mod test {
+    use sqlx::PgPool;
+
+    use super::*;
+    use crate::db::test_helpers;
+
+    #[sqlx::test]
+    async fn test_get_user(pool: PgPool) {
+        let env = Environment::from_pool(pool).await.unwrap();
+
+        test_helpers::enter_users(&env).await.unwrap();
+
+        assert_eq!(get_user_from_id(&env, 1).await.unwrap().username, "joe123");
+    }
+
+    #[sqlx::test]
+    async fn test_new_user(pool: PgPool) {
+        let env = Environment::from_pool(pool).await.unwrap();
+
+        new_user(
+            &env,
+            User {
+                id: 0,
+                username: "bob".to_string(),
+                password: "abc".to_string(),
+                session_key: None,
+            },
+        )
+        .await
+        .unwrap();
+
+        assert_eq!(get_user_from_id(&env, 1).await.unwrap().username, "bob");
+    }
+
+    #[sqlx::test]
+    async fn test_get_list(pool: PgPool) {
+        let env = Environment::from_pool(pool).await.unwrap();
+
+        test_helpers::enter_users(&env).await.unwrap();
+        test_helpers::enter_lists(&env).await.unwrap();
+
+        assert_eq!(
+            get_list_from_id(&env, 1).await.unwrap().title,
+            "joe123 list"
+        );
+
+        assert_eq!(
+            get_list_from_id(&env, 6).await.unwrap().title,
+            "another list"
+        );
+    }
+
+    #[sqlx::test]
+    async fn test_new_list(pool: PgPool) {
+        let env = Environment::from_pool(pool).await.unwrap();
+
+        test_helpers::enter_users(&env).await.unwrap();
+
+        new_list(
+            &env,
+            List {
+                id: 0,
+                user_id: 1,
+                title: "hello list".to_string(),
+            },
+        )
+        .await
+        .unwrap();
+
+        assert_eq!(get_list_from_id(&env, 1).await.unwrap().title, "hello list");
+    }
+
+    #[sqlx::test]
+    async fn test_get_items(pool: PgPool) {
+        let env = Environment::from_pool(pool).await.unwrap();
+
+        test_helpers::enter_users(&env).await.unwrap();
+        test_helpers::enter_lists(&env).await.unwrap();
+        test_helpers::enter_items(&env).await.unwrap();
+
+        assert_eq!(
+            get_list_items(&env, 3).await.unwrap(),
+            vec![TodoItem {
+                list_id: 3,
+                id: 7,
+                title: "only task".into(),
+                status: Some("only task".into()),
+                description: None,
+            }]
+        );
+    }
+
+    #[sqlx::test]
+    async fn test_new_item(pool: PgPool) {
+        let env = Environment::from_pool(pool).await.unwrap();
+
+        test_helpers::enter_users(&env).await.unwrap();
+        test_helpers::enter_lists(&env).await.unwrap();
+
+        new_item(
+            &env,
+            &TodoItem {
+                id: 0,
+                list_id: 5,
+                title: "hello task".into(),
+                status: Some("hello status".into()),
+                description: Some("hello description".into()),
+            },
+        )
+        .await
+        .unwrap();
+
+        assert_eq!(
+            get_list_items(&env, 5).await.unwrap(),
+            vec![TodoItem {
+                id: 1,
+                list_id: 5,
+                title: "hello task".into(),
+                status: Some("hello status".into()),
+                description: Some("hello description".into()),
+            }]
+        );
+    }
 }
