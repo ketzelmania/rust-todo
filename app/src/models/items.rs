@@ -8,5 +8,3 @@ pub struct TodoItem {
     pub status: Option<String>,
     pub description: Option<String>,
 }
-
-impl TodoItem {}

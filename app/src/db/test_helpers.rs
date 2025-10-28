@@ -1,5 +1,4 @@
 use crate::schemas::environment::Environment;
-use dotenvy::dotenv;
 use sqlx::Error;
 
 pub async fn setup_test_db(env: &Environment) -> Result<(), Error> {

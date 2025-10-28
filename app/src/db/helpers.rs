@@ -1,6 +1,6 @@
-use crate::models::list::List;
-use crate::models::list::items::TodoItem;
-use crate::models::user::User;
+use crate::models::items::TodoItem;
+use crate::models::lists::List;
+use crate::models::users::User;
 use crate::schemas::environment::Environment;
 use sqlx::Error;
 

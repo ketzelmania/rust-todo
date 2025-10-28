@@ -1,5 +1,3 @@
-pub mod items;
-
 #[derive(Debug, Clone, serde::Serialize, serde::Deserialize)]
 pub struct List {
     pub id: i32,
