@@ -1,10 +1,10 @@
 use crate::models::items::TodoItem;
 use crate::models::lists::List;
 use crate::models::users::User;
-use crate::schemas::environment::Environment;
+use crate::schemas;
 use sqlx::Error;
 
-pub async fn new_user(env: &Environment, user: User) -> Result<(), Error> {
+pub async fn new_user(env: &schemas::Environment, user: User) -> Result<(), Error> {
     sqlx::query!(
         "INSERT INTO users (username, password) VALUES ($1, $2)",
         user.username,
@@ -16,7 +16,7 @@ pub async fn new_user(env: &Environment, user: User) -> Result<(), Error> {
     Ok(())
 }
 
-pub async fn new_list(env: &Environment, list: List) -> Result<(), Error> {
+pub async fn new_list(env: &schemas::Environment, list: List) -> Result<(), Error> {
     sqlx::query!(
         "INSERT INTO lists (user_id, title) VALUES ($1, $2)",
         list.user_id,
@@ -28,7 +28,7 @@ pub async fn new_list(env: &Environment, list: List) -> Result<(), Error> {
     Ok(())
 }
 
-pub async fn new_item(env: &Environment, item: &TodoItem) -> Result<(), Error> {
+pub async fn new_item(env: &schemas::Environment, item: &TodoItem) -> Result<(), Error> {
     sqlx::query!(
         "INSERT INTO items (list_id, title, status, description) VALUES ($1, $2, $3, $4)",
         item.list_id,
@@ -44,7 +44,7 @@ pub async fn new_item(env: &Environment, item: &TodoItem) -> Result<(), Error> {
 
 // TODO: session keys
 
-pub async fn get_user_from_id(env: &Environment, id: i32) -> Result<User, Error> {
+pub async fn get_user_from_id(env: &schemas::Environment, id: i32) -> Result<User, Error> {
     let list = sqlx::query_as!(User, "SELECT * FROM users WHERE id = $1", id)
         .fetch_one(env.db())
         .await?;
@@ -52,7 +52,7 @@ pub async fn get_user_from_id(env: &Environment, id: i32) -> Result<User, Error>
     Ok(list)
 }
 
-pub async fn get_list_from_id(env: &Environment, id: i32) -> Result<List, Error> {
+pub async fn get_list_from_id(env: &schemas::Environment, id: i32) -> Result<List, Error> {
     let list = sqlx::query_as!(List, "SELECT * FROM lists WHERE id = $1", id)
         .fetch_one(env.db())
         .await?;
@@ -60,11 +60,11 @@ pub async fn get_list_from_id(env: &Environment, id: i32) -> Result<List, Error>
     Ok(list)
 }
 
-pub async fn does_list_exist(env: &Environment, id: i32) -> Result<bool, Error> {
+pub async fn does_list_exist(env: &schemas::Environment, id: i32) -> Result<bool, Error> {
     get_list_from_id(env, id).await.and(Ok(true))
 }
 
-pub async fn get_list_items(env: &Environment, id: i32) -> Result<Vec<TodoItem>, Error> {
+pub async fn get_list_items(env: &schemas::Environment, id: i32) -> Result<Vec<TodoItem>, Error> {
     let items = sqlx::query_as!(
             TodoItem,
             "SELECT items.id, items.list_id, items.title, items.status, items.description FROM items INNER JOIN lists ON items.list_id = lists.id WHERE lists.id = $1",
@@ -85,7 +85,7 @@ mod test {
 
     #[sqlx::test]
     async fn test_get_user(pool: PgPool) {
-        let env = Environment::from_pool(pool).await.unwrap();
+        let env = schemas::Environment::from_pool(pool).await.unwrap();
 
         test_helpers::enter_users(&env).await.unwrap();
 
@@ -94,7 +94,7 @@ mod test {
 
     #[sqlx::test]
     async fn test_new_user(pool: PgPool) {
-        let env = Environment::from_pool(pool).await.unwrap();
+        let env = schemas::Environment::from_pool(pool).await.unwrap();
 
         new_user(
             &env,
@@ -113,7 +113,7 @@ mod test {
 
     #[sqlx::test]
     async fn test_get_list(pool: PgPool) {
-        let env = Environment::from_pool(pool).await.unwrap();
+        let env = schemas::Environment::from_pool(pool).await.unwrap();
 
         test_helpers::enter_users(&env).await.unwrap();
         test_helpers::enter_lists(&env).await.unwrap();
@@ -131,7 +131,7 @@ mod test {
 
     #[sqlx::test]
     async fn test_new_list(pool: PgPool) {
-        let env = Environment::from_pool(pool).await.unwrap();
+        let env = schemas::Environment::from_pool(pool).await.unwrap();
 
         test_helpers::enter_users(&env).await.unwrap();
 
@@ -151,7 +151,7 @@ mod test {
 
     #[sqlx::test]
     async fn test_get_items(pool: PgPool) {
-        let env = Environment::from_pool(pool).await.unwrap();
+        let env = schemas::Environment::from_pool(pool).await.unwrap();
 
         test_helpers::enter_users(&env).await.unwrap();
         test_helpers::enter_lists(&env).await.unwrap();
@@ -171,7 +171,7 @@ mod test {
 
     #[sqlx::test]
     async fn test_new_item(pool: PgPool) {
-        let env = Environment::from_pool(pool).await.unwrap();
+        let env = schemas::Environment::from_pool(pool).await.unwrap();
 
         test_helpers::enter_users(&env).await.unwrap();
         test_helpers::enter_lists(&env).await.unwrap();

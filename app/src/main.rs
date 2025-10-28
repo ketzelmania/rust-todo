@@ -1,4 +1,3 @@
-use crate::schemas::environment::Environment;
 use dotenvy::dotenv;
 
 mod db;
@@ -12,7 +11,9 @@ async fn main() -> Result<(), sqlx::Error> {
     dotenv().ok();
 
     let url = std::env::var("DATABASE_URL").expect("DATABASE_URL must be set");
-    let env = Environment::new(&url).await.expect("Failed to parse env");
+    let env = schemas::Environment::new(&url)
+        .await
+        .expect("Failed to parse env");
 
     println!("Database connection successful");
 

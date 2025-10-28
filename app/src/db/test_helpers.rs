@@ -1,13 +1,13 @@
-use crate::schemas::environment::Environment;
+use crate::schemas;
 use sqlx::Error;
 
-pub async fn setup_test_db(env: &Environment) -> Result<(), Error> {
+pub async fn setup_test_db(env: &schemas::Environment) -> Result<(), Error> {
     sqlx::migrate!().run(env.db()).await?;
 
     Ok(())
 }
 
-pub async fn enter_users(env: &Environment) -> Result<(), Error> {
+pub async fn enter_users(env: &schemas::Environment) -> Result<(), Error> {
     let users = [
         "joe123", "joe124", "joe125", "joe126", "joe127", "joe128", "joe129", "joe130", "joe131",
     ];
@@ -29,7 +29,7 @@ pub async fn enter_users(env: &Environment) -> Result<(), Error> {
     Ok(())
 }
 
-pub async fn enter_lists(env: &Environment) -> Result<(), Error> {
+pub async fn enter_lists(env: &schemas::Environment) -> Result<(), Error> {
     let user_ids = [1, 1, 1, 2, 2, 3];
     let titles = [
         "joe123 list",
@@ -53,7 +53,7 @@ pub async fn enter_lists(env: &Environment) -> Result<(), Error> {
     Ok(())
 }
 
-pub async fn enter_items(env: &Environment) -> Result<(), Error> {
+pub async fn enter_items(env: &schemas::Environment) -> Result<(), Error> {
     let list_ids = [1, 1, 1, 1, 2, 2, 3, 4];
     let titles = [
         "do thing 1",
