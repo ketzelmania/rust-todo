@@ -22,12 +22,3 @@ pub async fn post_list(env: Environment, args: List) -> Result<impl Reply, Rejec
         }
     }
 }
-
-// TODO: turn db initialization into macros
-#[cfg(test)]
-mod test {
-    #[test]
-    fn test_get_reply_not_found() {
-        todo!()
-    }
-}
